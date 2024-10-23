@@ -11,7 +11,5 @@ namespace DataAccess.Concrete.EntityFramework;
 
 public class EfAirportDAL : EfRepositoryBase<Airport, int, FlightTicketContext>, IAirportDAL
 {
-    public EfAirportDAL(FlightTicketContext context) : base(context)
-    {
-    }
+
 }

@@ -16,123 +16,145 @@ namespace Core.DataAccess.EntityFramework;
 public class EfRepositoryBase<TEntity, TEntityId, TContext>
     : IEntityRepository<TEntity, TEntityId>
     where TEntity : Entity<TEntityId>
-    where TContext : DbContext
+    where TContext : DbContext,new()
 {
-    protected TContext Context { get; }
 
-    public EfRepositoryBase(TContext context)
-    {
-        Context = context;
-    }
 
     public TEntity? Get(Expression<Func<TEntity, bool>> predicate, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null, bool withDeleted = false, bool enableTracking = true)
     {
-        IQueryable<TEntity> queryable = Query();
-        if (!enableTracking)
-            queryable = queryable.AsNoTracking();
-        if (include != null)
-            queryable = include(queryable);
-        if (withDeleted)
-            queryable = queryable.IgnoreQueryFilters();
-        return queryable.FirstOrDefault(predicate);
+        using (TContext Context = new TContext())
+        {
+            IQueryable<TEntity> queryable = Context.Set<TEntity>();
+
+            if (!enableTracking)
+                queryable = queryable.AsNoTracking();
+            if (include != null)
+                queryable = include(queryable);
+            if (withDeleted)
+                queryable = queryable.IgnoreQueryFilters();
+            return queryable.FirstOrDefault(predicate);
+        }
     }
 
     public ICollection<TEntity> GetList(Expression<Func<TEntity, bool>>? predicate = null, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null, int index = 0, int size = 10, bool withDeleted = false, bool enableTracking = true)
     {
-        IQueryable<TEntity> queryable = Query();
-        if (!enableTracking)
-            queryable = queryable.AsNoTracking();
-        if (include != null)
-            queryable = include(queryable);
-        if (withDeleted)
-            queryable = queryable.IgnoreQueryFilters();
-        if (predicate != null)
-            queryable = queryable.Where(predicate);
-        if (orderBy != null)
-            return orderBy(queryable).ToList();
-        return queryable.ToList();
+        using (TContext Context = new TContext())
+        {
+            IQueryable<TEntity> queryable = Context.Set<TEntity>();
+            if (!enableTracking)
+                queryable = queryable.AsNoTracking();
+            if (include != null)
+                queryable = include(queryable);
+            if (withDeleted)
+                queryable = queryable.IgnoreQueryFilters();
+            if (predicate != null)
+                queryable = queryable.Where(predicate);
+            if (orderBy != null)
+                return orderBy(queryable).ToList();
+            return queryable.ToList();
+        }
     }
 
     public bool Any(Expression<Func<TEntity, bool>>? predicate = null, bool withDeleted = false, bool enableTracking = true)
     {
-        IQueryable<TEntity> queryable = Query();
-        if (!enableTracking)
-            queryable = queryable.AsNoTracking();
-        if (withDeleted)
-            queryable = queryable.IgnoreQueryFilters();
-        if (predicate != null)
-            queryable = queryable.Where(predicate);
-        return queryable.Any();
+        using (TContext Context = new TContext())
+        {
+            IQueryable<TEntity> queryable = Context.Set<TEntity>();
+            if (!enableTracking)
+                queryable = queryable.AsNoTracking();
+            if (withDeleted)
+                queryable = queryable.IgnoreQueryFilters();
+            if (predicate != null)
+                queryable = queryable.Where(predicate);
+            return queryable.Any();
+        }
     }
 
     public TEntity Add(TEntity entity)
     {
-        entity.CreatedDate = DateTime.UtcNow;
-        Context.Add(entity);
-        Context.SaveChanges();
-        return entity;
+        using (TContext Context = new TContext())
+        {
+            entity.CreatedDate = DateTime.UtcNow;
+            Context.Add(entity);
+            Context.SaveChanges();
+            return entity;
+        }
     }
 
     public ICollection<TEntity> AddRange(ICollection<TEntity> entities)
     {
-        foreach (TEntity entity in entities)
-            entity.CreatedDate = DateTime.UtcNow;
-        Context.AddRange(entities);
-        Context.SaveChanges();
-        return entities;
+        using (TContext Context = new TContext())
+        {
+            foreach (TEntity entity in entities)
+                entity.CreatedDate = DateTime.UtcNow;
+            Context.AddRange(entities);
+            Context.SaveChanges();
+            return entities;
+        }
     }
 
     public TEntity Update(TEntity entity)
     {
-        entity.UpdatedDate = DateTime.UtcNow;
-        Context.Entry(entity).State = EntityState.Modified;
-        Context.SaveChanges();
-        return entity;
+        using (TContext Context = new TContext())
+        {
+            entity.UpdatedDate = DateTime.UtcNow;
+            Context.Entry(entity).State = EntityState.Modified;
+            Context.SaveChanges();
+            return entity;
+        }
     }
 
     public ICollection<TEntity> UpdateRange(ICollection<TEntity> entities)
     {
-        foreach (TEntity entity in entities)
-            entity.UpdatedDate = DateTime.UtcNow;
-        Context.UpdateRange(entities);
-        Context.SaveChanges();
-        return entities;
+        using (TContext Context = new TContext())
+        {
+            foreach (TEntity entity in entities)
+                entity.UpdatedDate = DateTime.UtcNow;
+            Context.UpdateRange(entities);
+            Context.SaveChanges();
+            return entities;
+        }
     }
 
     public TEntity Delete(TEntity entity, bool permanent = false)
     {
-        SetEntityAsDeletedAsync(entity, permanent).Wait();
-        Context.SaveChangesAsync().Wait();
-        return entity;
+        using (TContext Context = new TContext())
+        {
+            SetEntityAsDeletedAsync(entity, permanent,Context).Wait();
+            Context.SaveChangesAsync().Wait();
+            return entity;
+        }
     }
 
     public ICollection<TEntity> DeleteRange(ICollection<TEntity> entities, bool permanent = false)
     {
-        SetEntityAsDeletedAsync(entities, permanent).Wait();
-        Context.SaveChangesAsync().Wait();
-        return entities;
+        using (TContext Context = new TContext())
+        {
+            SetEntityAsDeletedAsync(entities, permanent, Context).Wait();
+            Context.SaveChangesAsync().Wait();
+            return entities;
+        }
     }
 
-    public IQueryable<TEntity> Query() => Context.Set<TEntity>();
 
 
-    protected async Task SetEntityAsDeletedAsync(TEntity entity, bool permanent)
+    protected async Task SetEntityAsDeletedAsync(TEntity entity, bool permanent,TContext context)
     {
         if (!permanent)
         {
-            CheckHasEntityHaveOneToOneRelation(entity);
-            await setEntityAsSoftDeletedAsync(entity);
+            CheckHasEntityHaveOneToOneRelation(entity,context);
+            await setEntityAsSoftDeletedAsync(entity,context);
         }
         else
         {
-            Context.Remove(entity);
+            context.Remove(entity);
         }
     }
 
-    protected void CheckHasEntityHaveOneToOneRelation(TEntity entity)
+    protected void CheckHasEntityHaveOneToOneRelation(TEntity entity,TContext context)
     {
         bool hasEntityHaveOneToOneRelation =
-            Context
+            context
                 .Entry(entity)
                 .Metadata.GetForeignKeys()
                 .All(
@@ -147,13 +169,13 @@ public class EfRepositoryBase<TEntity, TEntityId, TContext>
             );
     }
 
-    private async Task setEntityAsSoftDeletedAsync(IEntityTimestamps entity)
+    private async Task setEntityAsSoftDeletedAsync(IEntityTimestamps entity,TContext context)
     {
         if (entity.DeletedDate.HasValue)
             return;
         entity.DeletedDate = DateTime.UtcNow;
 
-        var navigations = Context
+        var navigations = context
             .Entry(entity)
             .Metadata.GetNavigations()
             .Where(x => x is { IsOnDependent: false, ForeignKey.DeleteBehavior: DeleteBehavior.ClientCascade or DeleteBehavior.Cascade })
@@ -170,31 +192,31 @@ public class EfRepositoryBase<TEntity, TEntityId, TContext>
             {
                 if (navValue == null)
                 {
-                    IQueryable query = Context.Entry(entity).Collection(navigation.PropertyInfo.Name).Query();
+                    IQueryable query = context.Entry(entity).Collection(navigation.PropertyInfo.Name).Query();
                     navValue = await GetRelationLoaderQuery(query, navigationPropertyType: navigation.PropertyInfo.GetType()).ToListAsync();
                     if (navValue == null)
                         continue;
                 }
 
                 foreach (IEntityTimestamps navValueItem in (IEnumerable)navValue)
-                    await setEntityAsSoftDeletedAsync(navValueItem);
+                    await setEntityAsSoftDeletedAsync(navValueItem, context);
             }
             else
             {
                 if (navValue == null)
                 {
-                    IQueryable query = Context.Entry(entity).Reference(navigation.PropertyInfo.Name).Query();
+                    IQueryable query = context.Entry(entity).Reference(navigation.PropertyInfo.Name).Query();
                     navValue = await GetRelationLoaderQuery(query, navigationPropertyType: navigation.PropertyInfo.GetType())
                         .FirstOrDefaultAsync();
                     if (navValue == null)
                         continue;
                 }
 
-                await setEntityAsSoftDeletedAsync((IEntityTimestamps)navValue);
+                await setEntityAsSoftDeletedAsync((IEntityTimestamps)navValue,context);
             }
         }
 
-        Context.Update(entity);
+        context.Update(entity);
     }
 
     protected IQueryable<object> GetRelationLoaderQuery(IQueryable query, Type navigationPropertyType)
@@ -211,10 +233,10 @@ public class EfRepositoryBase<TEntity, TEntityId, TContext>
         return queryProviderQuery.Where(x => !((IEntityTimestamps)x).DeletedDate.HasValue);
     }
 
-    protected async Task SetEntityAsDeletedAsync(IEnumerable<TEntity> entities, bool permanent)
+    protected async Task SetEntityAsDeletedAsync(IEnumerable<TEntity> entities, bool permanent,TContext context)
     {
         foreach (TEntity entity in entities)
-            await SetEntityAsDeletedAsync(entity, permanent);
+            await SetEntityAsDeletedAsync(entity, permanent,context);
     }
 
     public ICollection<TEntity> Search(string searchTerm, Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = null, Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>? include = null, int index = 0, int size = 10, bool withDeleted = false, bool enableTracking = true)

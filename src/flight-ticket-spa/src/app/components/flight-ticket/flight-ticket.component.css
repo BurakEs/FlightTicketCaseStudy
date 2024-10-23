@@ -1,0 +1,33 @@
+.search-form {
+    background-color: rgba(255, 255, 255, 0.85);
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 50px;
+    color: #333;
+}
+.btn-search {
+    background-color: #004c7d;
+    color: white;
+    width: 100%;
+}
+.btn-search:hover {
+    background-color: #003354;
+}
+.form-control {
+    height: 45px;
+}
+.form-check-input {
+    margin-right: 5px;
+}
+.container {
+    background-image: url('https://www.transparenttextures.com/patterns/grey-floral.png');
+}
+.dropdown-menu {
+    width: 300px; /* Dropdown genişliği */
+    max-height: 200px; /* Maksimum yükseklik */
+    overflow-y: auto; /* Dikey kaydırma ekle */
+    border: 1px solid #ccc; /* Kenar çizgisi */
+    border-radius: 4px; /* Kenar yuvarlama */
+    background-color: white; /* Arka plan rengi */
+    z-index: 1000; /* Üst katman */
+}

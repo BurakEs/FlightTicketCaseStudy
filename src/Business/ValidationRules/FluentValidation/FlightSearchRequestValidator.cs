@@ -4,6 +4,7 @@ using FluentValidation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.ServiceModel.Channels;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,15 +14,29 @@ public class FlightSearchRequestValidator : AbstractValidator<FlightSearchReques
 {
     public FlightSearchRequestValidator()
     {
-        RuleFor(x => x.OriginAirpot).NotEmpty().WithMessage(Messages.NotEmpty);
-        RuleFor(x => x.DestinationAirpot).NotEmpty().WithMessage(Messages.NotEmpty);
-        RuleFor(x => x).Must(x => x.OriginAirpot.Id != x.DestinationAirpot.Id).WithMessage(Messages.AirportsCannotBeTheSame); 
-        RuleFor(x => x).Must(x => x.OriginAirpot.Name != x.DestinationAirpot.Name).WithMessage(Messages.AirportsCannotBeTheSame); 
-        RuleFor(x => x).Must(x => x.OriginAirpot.IataCode != x.DestinationAirpot.IataCode).WithMessage(Messages.AirportsCannotBeTheSame); 
+        RuleFor(x => x.OriginAirport)
+    .NotEmpty().WithMessage(Messages.NotEmpty);
 
+        RuleFor(x => x.DestinationAirport)
+            .NotEmpty().WithMessage(Messages.NotEmpty);
+
+        RuleFor(x => x)
+            .Must(x => x.OriginAirport.Name != x.DestinationAirport.Name)
+            .WithMessage(Messages.AirportsCannotBeTheSame);
         RuleFor(p => p.DepartureDate)
+            .NotEmpty().WithMessage(Messages.DepartureDateCannotBeEmpty)
+            .Must(BeNotInThePast).WithMessage(Messages.CanNotInThePast);
+
+        RuleFor(p => p.ReturnDate)
         .NotEmpty()
-        .Must(BeNotInThePast).WithMessage(Messages.CanNotInThePast);
+        .When(p => p.IsRoundTrip) // ReturnDate boş olmamalı ise
+        .WithMessage(Messages.ReturnDateCannotBeEmpty);
+
+        RuleFor(p => p.ReturnDate)
+            .GreaterThan(p => p.DepartureDate)
+            .WithMessage(Messages.ReturnDateMustBeGreaterThanDepartureDate)
+            .When(p => p.ReturnDate.HasValue);
+
     }
     private bool BeNotInThePast(DateTime date)
     {

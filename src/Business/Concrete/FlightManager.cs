@@ -26,21 +26,34 @@ public class FlightManager : IFlightService
     [ValidationAspect(typeof(FlightSearchRequestValidator), Priority = 1)]
     public IDataResult<FlightSearchResponseDto> FlightSearch(FlightSearchRequestDto flightSearchRequestDto)
     {
-        SearchRequest searchRequest = _mapper.Map<SearchRequest>(flightSearchRequestDto);
+        FlightSearchResponseDto flightSearchResponse = new FlightSearchResponseDto();
 
-        SearchResult searchResult = _airSearchClient.AvailabilitySearchAsync(searchRequest).Result;
-
-        if (!searchResult.HasError)
+        SearchRequest searchDepartureRequest = _mapper.Map<SearchRequest>(flightSearchRequestDto);
+        if (flightSearchRequestDto.IsRoundTrip)
         {
-            FlightSearchResponseDto flightSearchResponseDto = _mapper.Map<FlightSearchResponseDto>(searchResult, opt =>
+            flightSearchRequestDto.SwapAirports();
+            SearchRequest searchReturnRequest = _mapper.Map<SearchRequest>(flightSearchRequestDto);
+            SearchResult searchReturnResult = _airSearchClient.AvailabilitySearchAsync(searchReturnRequest).Result;
+
+            FlightDetailDto returnFlightSearchResult = _mapper.Map<FlightDetailDto>(searchReturnResult, opt =>
             {
-                opt.Items["OriginAirpot"] = flightSearchRequestDto.OriginAirpot;
-                opt.Items["DestinationAirpot"] = flightSearchRequestDto.DestinationAirpot;
+                opt.Items["OriginAirpot"] = flightSearchRequestDto.OriginAirport;
+                opt.Items["DestinationAirpot"] = flightSearchRequestDto.DestinationAirport;
             });
 
-            return new SuccessDataResult<FlightSearchResponseDto>(flightSearchResponseDto);
+            flightSearchResponse.ReturnAirportDetails = returnFlightSearchResult;
         }
 
-        return new ErrorDataResult<FlightSearchResponseDto>();
+        SearchResult searchDepartureResult = _airSearchClient.AvailabilitySearchAsync(searchDepartureRequest).Result;
+        FlightDetailDto departureFlightSearchResult = _mapper.Map<FlightDetailDto>(searchDepartureResult, opt =>
+        {
+            opt.Items["OriginAirpot"] = flightSearchRequestDto.DestinationAirport;
+            opt.Items["DestinationAirpot"] = flightSearchRequestDto.OriginAirport;
+        });
+        flightSearchResponse.DepartureAirportDetails = departureFlightSearchResult;
+
+
+
+        return new SuccessDataResult<FlightSearchResponseDto>(flightSearchResponse);
     }
 }

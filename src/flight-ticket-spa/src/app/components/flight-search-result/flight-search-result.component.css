@@ -1,0 +1,82 @@
+
+.flight-search-result{
+    background-color: #e2ae11;
+    width: 100%;
+    height: 100%;
+}
+.flight-search-result > h3 {
+    margin: 5px;
+    padding: 5px;
+    font-weight: bold;
+    color: white;
+}
+.flight-detail{
+    background-color: #f4f4f4;
+    border-radius: 10px;
+    align-items: center;
+    cursor: pointer;
+    margin: 10px 0 10px 0;
+}
+.fligt-compony-logo{
+    height: 100px; /* İstediğiniz yükseklik */
+    display: flex; /* Flexbox ile merkezleme */
+    align-items: center; /* Dikey ortalama */
+    overflow: hidden; /* Taşan kısımları gizler */
+}
+.fligt-compony-logo > img{
+    max-width: 100%; /* Kutuya tam uyum sağlar */
+    max-height: 100%; /* Yüksekliğe tam uyum sağlar */
+    object-fit: cover; /* Resmi kutuya sığdırırken keser */
+}
+.flight-from-to{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: center;
+}
+.flight-code{
+    font-weight: bold;
+    text-align: center;
+}
+.fligt-gif{
+    width: 100%; /* Kutu genişliği %100, col-md ile uyum sağlar */
+    height: 80px; /* İstediğiniz yükseklik */
+    overflow: hidden; /* Taşan kısımları gizler */
+    position: relative; /* Konumlandırma için */
+}
+.fligt-gif > img{
+    width: 100%; /* Kutu genişliğine tam uyum sağlar */
+    height: auto; /* Yüksekliği orantılı ayarlamak için */
+    position: absolute; /* Konumlandırma için */
+    top: 50%; /* Dikey ortalama */
+    left: 50%; /* Yatay ortalama */
+    transform: translate(-50%, -50%) scale(0.7); /* Merkezden yakınlaştırarak kesme */
+    object-fit: cover; /* Resmi kutuya sığdırırken keser */
+}
+.fligt-price{
+    position: relative;
+    height: 100px;
+}
+.price{
+    text-align: center;
+    align-content: center;
+    height: 100%;
+    font-size: 22px;
+    font-weight: bold;
+}
+.fligt-date-box{
+    position: absolute;
+    top: 0;
+    right: 0;
+    background-color: #f20000;
+    color: white;
+    font-size: 15px;
+    padding: 5px;
+    border-radius: 5px;
+    font-weight: bold;
+}
+.selected-flight {
+    border: 2px solid blue; /* Renk ve kalınlık isteğe göre değiştirilebilir */
+    padding: 10px;
+    border-radius: 5px;
+}

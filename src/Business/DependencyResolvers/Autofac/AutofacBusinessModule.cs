@@ -17,12 +17,12 @@ namespace Business.DependencyResolvers.Autofac
         {
 
 
-            builder.RegisterType<FlightTicketContext>();
+            //builder.RegisterType<FlightTicketContext>();
 
-            builder.RegisterType<AirportManager>().As<IAirportService>();
-            builder.RegisterType<EfAirportDAL>().As<IAirportDAL>();
+            //builder.RegisterType<AirportManager>().As<IAirportService>();
+            //builder.RegisterType<EfAirportDAL>().As<IAirportDAL>();
 
-            builder.RegisterType<FlightManager>().As<IFlightService>();
+            //builder.RegisterType<FlightManager>().As<IFlightService>();
 
 
 

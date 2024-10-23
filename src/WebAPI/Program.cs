@@ -5,6 +5,7 @@ using Autofac.Extensions.DependencyInjection;
 using Autofac;
 using Business.DependencyResolvers.Autofac;
 using Business.DependencyResolvers;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebAPI
 {
@@ -25,19 +26,19 @@ namespace WebAPI
                 containerBuilder.RegisterModule(new AutofacBusinessModule());
                 // You can add more modules here if needed
             });
-
+            builder.Services.AddCors();
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
-            builder.Services.AddDependenyResolvers(new ICoreModule[]
+            builder.Services.AddDependenyResolvers(builder.Configuration,new ICoreModule[]
             {
                 new CoreModule(),
                 new BusinessModul(),
             });
-
+           
             var app = builder.Build();
-
+           
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())
             {
@@ -45,7 +46,9 @@ namespace WebAPI
                 app.UseSwaggerUI();
             }
             //else
-                app.ConfigureCustomExceptionMiddleware();
+            app.ConfigureCustomExceptionMiddleware();
+
+            app.UseCors(builder => builder.WithOrigins("http://localhost:4200").AllowAnyHeader());
 
             app.UseHttpsRedirection();
 

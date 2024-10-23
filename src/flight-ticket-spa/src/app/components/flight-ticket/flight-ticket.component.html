@@ -1,0 +1,60 @@
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-10 search-form">
+            <h2 class="text-center">UÇUŞ ARA</h2>
+            <form (ngSubmit)="onSubmit()">
+                <div class="row mb-3">
+                    <div class="col-md-12 text-center">
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="flightType" id="oneWay" value="oneWay" checked>
+                            <label class="form-check-label" for="oneWay">Tek Yön</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="flightType" id="roundTrip" value="roundTrip" [(ngModel)]="isRoundTrip">
+                            <label class="form-check-label" for="roundTrip">Gidiş Dönüş</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <label for="departure" class="form-label">Kalkış Yeri</label>
+                        <input type="text" class="form-control" id="departure" placeholder="Kalkış Yeri" name="departure" [(ngModel)]="departureTerm" (input)="onDepartureChange()">
+                        <div *ngIf="isDepartureDropdownVisible" class="dropdown-menu show">
+                            <div *ngFor="let airport of filteredDepartureAirports" 
+                                 class="dropdown-item" 
+                                 (click)="selectDeparture(airport)">
+                                {{ airport.name }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="destination" class="form-label">Varış Yeri</label>
+                        <input type="text" class="form-control" id="destination" placeholder="Varış Yeri" name="destination" [(ngModel)]="destinationTerm" (input)="onDestinationChange()">
+                        <div *ngIf="isDestinationDropdownVisible" class="dropdown-menu show">
+                            <div *ngFor="let airport of filteredDestinationAirports" 
+                                 class="dropdown-item" 
+                                 (click)="selectDestination(airport)">
+                                {{ airport.name }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="departureDate" class="form-label">Kalkış Tarihi</label>
+                        <input type="date" class="form-control" id="departureDate" name="departureDate" [(ngModel)]="departureDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="returnDate" class="form-label">Dönüş Tarihi</label>
+                        <input type="date" class="form-control" id="returnDate" name="returnDate" [(ngModel)]="returnDate" [disabled]="!isRoundTrip">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-search">UÇUŞ ARA</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

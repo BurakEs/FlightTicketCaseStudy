@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Core.DataAccess;
 
-public interface IEntityRepository<TEntity, TEntityId> : IQuery<TEntity>
+public interface IEntityRepository<TEntity, TEntityId>
     where TEntity : Entity<TEntityId>
 {
     TEntity? Get(

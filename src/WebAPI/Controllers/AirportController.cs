@@ -17,10 +17,11 @@ namespace WebAPI.Controllers
         [HttpGet("search")]
         public IActionResult Search(string searchTerm)
         {
+            Console.WriteLine($"Gelen Airport SearchTerm : {searchTerm}");
             var result = _airportService.SearchAirports(searchTerm);
             if (result.Success)
             {
-                return Ok(result.Data);
+                return Ok(result);
             }
 
             return BadRequest(result.Message);

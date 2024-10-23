@@ -1,0 +1,102 @@
+<div class="container-fluid"  *ngIf="flightSearchResult">
+    <div class="flight-search-result">
+        <h3>Gidiş Biletleri</h3>
+        <div  *ngFor="let option of flightSearchResult.departureAirportDetails.flightOptions" class="flight-detail row"
+        (click)="onSelectFlight(option, 'departure', flightSearchResult.departureAirportDetails)"
+        [ngClass]="{'selected-flight': selectedDepartureFlight?.flight === option}" >
+
+            <input type="radio" name="departure" style="display: none;" />
+                <div class="fligt-compony-logo col-md-2">
+                    <img src="https://ttyd.org.tr/wp-content/uploads/2022/01/pegasus-airlines-eps-vector-logo.png"/>
+                </div>
+                <div class="flight-from-to col-md-7">
+                    <div class="flight-from-text ">
+                        <div class="flight-from-text">{{ flightSearchResult.departureAirportDetails.originAirport.name }} </div>
+                        <div class="flight-code">{{ flightSearchResult.departureAirportDetails.originAirport.isoRegion }}</div>
+                        <div class="flight-from-hour"> {{ option.arrivalDateTime | date: 'HH:mm' }}</div>
+                    </div>
+                    <div class="fligt-gif"><img src="https://i.pinimg.com/originals/71/ef/47/71ef47140fab5931b5d767bb4c3f3406.gif" alt=""></div>
+                    <div class="flight-to-text ">
+                        <div class="flight-from-text">{{ flightSearchResult.departureAirportDetails.destinationAirport.name }}</div>
+                        <div class="flight-code">{{ flightSearchResult.departureAirportDetails.destinationAirport.isoRegion}}</div>
+                        <div class="flight-from-hour">{{ option.departureDateTime | date: 'HH:mm' }}</div>
+                    </div>
+                </div>
+
+                <div class="fligt-price col-md-3">
+                    <div class="fligt-date-box">{{ option.arrivalDateTime}}</div>
+                    <div class="price">{{ option.price}}</div>
+                </div>
+        </div>
+        <h3  *ngIf="flightSearchResult.returnAirportDetails != undefined">Dönüş Biletleri</h3>
+        <div  *ngFor="let option of flightSearchResult.returnAirportDetails?.flightOptions" class="flight-detail row"
+        (click)="flightSearchResult.returnAirportDetails && onSelectFlight(option, 'return', flightSearchResult.returnAirportDetails)" 
+        [ngClass]="{'selected-flight': selectedReturnFlight?.flight === option}">
+
+            <input type="radio" name="return" style="display: none;" />
+            <div class="fligt-compony-logo col-md-2">
+                <img src="https://ttyd.org.tr/wp-content/uploads/2022/01/pegasus-airlines-eps-vector-logo.png"/>
+            </div>
+
+            <div class="flight-from-to col-md-7">
+                <div class="flight-from-text ">
+                    <div class="flight-from-text">{{ flightSearchResult.returnAirportDetails?.originAirport?.name }} </div>
+                    <div class="flight-code">{{ flightSearchResult.returnAirportDetails?.originAirport?.isoRegion }}</div>
+                    <div class="flight-from-hour"> {{ option.arrivalDateTime | date: 'HH:mm' }}</div>
+                </div>
+
+                <div class="fligt-gif"><img src="https://i.pinimg.com/originals/71/ef/47/71ef47140fab5931b5d767bb4c3f3406.gif" alt=""></div>
+
+                <div class="flight-to-text ">
+                    <div class="flight-from-text">{{ flightSearchResult.returnAirportDetails?.destinationAirport?.name }}</div>
+                    <div class="flight-code">{{ flightSearchResult.returnAirportDetails?.destinationAirport?.isoRegion}}</div>
+                    <div class="flight-from-hour">{{ option.departureDateTime | date: 'HH:mm' }}</div>
+                </div>
+            </div>
+
+            <div class="fligt-price col-md-3">
+                <div class="fligt-date-box">{{ option.arrivalDateTime}}</div>
+                <div class="price">{{ option.price}}</div>
+            </div>
+    </div>
+<!-- Sepeti Onayla Butonu -->
+<button class="btn btn-primary col-md-12" (click)="onConfirmSelection(flightDetailsModal)">Sepeti Onayla</button>
+
+
+    </div>
+</div>
+
+
+<!-- Popup Modal -->
+<ng-template #flightDetailsModal let-modal>
+    <div class="modal-header">
+      <h4 class="modal-title">Seçilen Uçuş Detayları</h4>
+      <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+     <!-- Gidiş Bileti -->
+      <span ></span>
+        <h5>Gidiş Bileti</h5>
+        <p><strong>Başlangıç Havalimanı:</strong> {{ selectedDepartureFlight?.details?.originAirport?.name }}</p>
+        <p><strong>Varış Havalimanı:</strong> {{ selectedDepartureFlight?.details?.destinationAirport?.name }}</p>
+        <p><strong>Kalkış Saati:</strong> {{ selectedDepartureFlight?.flight?.arrivalDateTime | date: 'HH:mm' }}</p>
+        <p><strong>Varış Saati:</strong> {{ selectedDepartureFlight?.flight?.departureDateTime| date: 'HH:mm' }}</p>
+        <p><strong>Fiyat:</strong> {{ selectedDepartureFlight?.flight?.price }}</p>
+
+<div *ngIf="selectedReturnFlight != undefined">
+<!-- Dönüş Bileti -->
+<h5>Dönüş Bileti</h5>
+<p><strong>Başlangıç Havalimanı:</strong> {{ selectedReturnFlight.details?.originAirport?.name }}</p>
+<p><strong>Varış Havalimanı:</strong> {{ selectedReturnFlight.details?.destinationAirport?.name }}</p>
+<p><strong>Kalkış Saati:</strong> {{ selectedReturnFlight.flight?.arrivalDateTime | date: 'HH:mm' }}</p>
+<p><strong>Varış Saati:</strong> {{ selectedReturnFlight.flight?.departureDateTime | date: 'HH:mm' }}</p>
+<p><strong>Fiyat:</strong> {{ selectedReturnFlight.flight?.price }}</p>
+</div>
+        
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" (click)="closePopup()">Kapat</button>
+    </div>
+  </ng-template>
