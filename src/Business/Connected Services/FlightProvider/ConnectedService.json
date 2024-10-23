@@ -1,0 +1,17 @@
+{
+  "ExtendedData": {
+    "inputs": [
+      "https://localhost:5001/Service.svc?wsdl"
+    ],
+    "collectionTypes": [
+      "System.Array",
+      "System.Collections.Generic.Dictionary`2"
+    ],
+    "internalTypeAccess": true,
+    "namespaceMappings": [
+      "*, FlightProvider"
+    ],
+    "targetFramework": "net8.0",
+    "typeReuseMode": "Specified"
+  }
+}
